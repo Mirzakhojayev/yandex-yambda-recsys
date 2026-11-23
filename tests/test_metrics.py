@@ -25,3 +25,19 @@ def test_average_over_users():
     m = evaluate(recs={0: [1], 1: [5]}, targets={0: [1], 1: [6]}, k=1, num_items=10)
     assert m["ndcg@1"] == pytest.approx(0.5)
     assert m["recall@1"] == pytest.approx(0.5)
+
+def test_paper_vs_official_ndcg():
+    # user 0: 1 target, hit at rank 1. user 1: 2 targets, no hits.
+    recs = {0: [1, 9], 1: [8, 9]}
+    targets = {0: [1], 1: [5, 6]}
+    official = evaluate(recs, targets, k=2, num_items=10, paper_compat=False)
+    paper = evaluate(recs, targets, k=2, num_items=10, paper_compat=True)
+    assert official["ndcg@2"] == pytest.approx(0.5)  # mean of 1.0 and 0.0
+    assert paper["ndcg@2"] == pytest.approx(1 / (2 + 1 / math.log2(3)))  # ~0.380
+
+
+def test_paper_vs_official_recall():
+    recs = {0: [1]}
+    targets = {0: [1, 2, 3]}
+    assert evaluate(recs, targets, 1, 10, paper_compat=False)["recall@1"] == pytest.approx(1.0)
+    assert evaluate(recs, targets, 1, 10, paper_compat=True)["recall@1"] == pytest.approx(1 / 3)
