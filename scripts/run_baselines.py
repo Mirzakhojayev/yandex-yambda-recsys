@@ -3,7 +3,7 @@ import polars as pl
 
 from yambda_rec.baselines import decay_pop, most_pop
 from yambda_rec.data import TEST_START, VAL_END, VAL_START, likes, listen_plus, load_events, split
-from yambda_rec.evaluate import build_targets, num_items, report
+from yambda_rec.evaluate import build_targets, num_items, report, new_tracks_only, seen_items, exclude_seen
 from yambda_rec.history import fill_with, user_history
 from yambda_rec.metrics import evaluate
 
@@ -47,21 +47,35 @@ def run(target_name: str, df: pl.LazyFrame) -> list[dict]:
     )
 
     train, test = split(df, TEST_START)
-    targets = build_targets(test)
     n_items = num_items(train)
-    return [
-        report(f"MostPop / {target_name}", same_for_all(most_pop(train), targets), targets, n_items),
-        report(f"DecayPop {pop_hours}h / {target_name}", pop_recs(train, targets, pop_hours),
+
+    targets = build_targets(test)
+    rows = [
+        report(f"MostPop / {target_name} / all", same_for_all(most_pop(train), targets),
                targets, n_items),
-        report(f"History {hist_hours}h / {target_name}",
+        report(f"DecayPop {pop_hours}h / {target_name} / all", pop_recs(train, targets, pop_hours),
+               targets, n_items),
+        report(f"History {hist_hours}h / {target_name} / all",
                history_recs(train, targets, hist_hours, pop_hours), targets, n_items),
     ]
+
+    # New tracks only: repeats removed from the targets AND heard tracks removed from the recs.
+    # History is skipped: with the user's own tracks removed it is just DecayPop.
+    new_targets = build_targets(new_tracks_only(test, train))
+    seen = seen_items(train)
+    for name, top in (
+        ("MostPop", most_pop(train, k=LONG_K)),
+        (f"DecayPop {pop_hours}h", decay_pop(train, pop_hours, k=LONG_K)),
+    ):
+        recs = exclude_seen(same_for_all(top, new_targets), seen)
+        rows.append(report(f"{name} / {target_name} / new only", recs, new_targets, n_items))
+    return rows
 
 
 def main():
     events = load_events()
     rows = run("Listen+", listen_plus(events)) + run("Like", likes(events))
-    with pl.Config(tbl_cols=-1, float_precision=4, tbl_width_chars=200):
+    with pl.Config(tbl_rows=-1, tbl_cols=-1, fmt_str_lengths=60, float_precision=4, tbl_width_chars=200):
         print(pl.DataFrame(rows))
 
 
