@@ -77,19 +77,6 @@ notebooks/
 tests/
 ```
 
-## Roadmap
-
-- [x] Data download, exploration and the official temporal split
-- [x] Metrics matching the paper, with unit tests
-- [x] Reproduce MostPop and DecayPop from the paper
-- [x] Per-user history baseline
-- [ ] "New tracks only" evaluation
-- [ ] Retrieval: SASRec (tuned), plus an audio-embedding retriever
-- [ ] Merge the candidates from all retrievers
-- [ ] Ranking with LightGBM (LambdaRank)
-- [ ] Studies: cold-start tracks, organic vs recommended listens, Listen+ vs Like, popularity bias
-- [ ] Write-up and release on Hugging Face
-
 ## References
 
 - Ploshkin et al., *Yambda-5B — A Large-Scale Multi-modal Dataset for Ranking and Retrieval*, 2025.

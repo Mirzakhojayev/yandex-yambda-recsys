@@ -33,3 +33,8 @@ def test_fill_pads_with_fallback_without_duplicates():
     out = fill_with({1: [5, 6]}, fallback=[6, 7, 8, 9], users=[1, 2], k=4)
     assert out[1] == [5, 6, 7, 8]
     assert out[2] == [6, 7, 8, 9]  # user with no history gets the fallback only
+
+def test_full_ties_broken_by_item_id():
+    # same timestamp, same score: lower item_id first, every time
+    train = make_train([(1, 30, 0), (1, 10, 0), (1, 20, 0)])
+    assert user_history(train, hours=1)[1] == [10, 20, 30]

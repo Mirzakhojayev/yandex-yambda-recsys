@@ -21,8 +21,11 @@ def user_history(
             pl.col("timestamp").max().alias("last_ts"),
         )
         .group_by("uid")
-        .agg(pl.col("item_id").sort_by(["score", "last_ts"], descending=[True, True]).head(k))
-        .collect()
+        .agg(
+            pl.col("item_id")
+            .sort_by(["score", "last_ts", "item_id"], descending=[True, True, False])
+            .head(k)
+        )        .collect()
     )
     return dict(zip(df["uid"].to_list(), df["item_id"].to_list()))
 

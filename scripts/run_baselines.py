@@ -9,6 +9,7 @@ from yambda_rec.metrics import evaluate
 
 POP_HOURS_GRID = [0.5, 1, 2, 3, 6, 12, 24]  # official DecayPop search space
 HISTORY_HOURS_GRID = [1, 6, 24, 72, 168, 720, 8760]  # 1 hour ... 1 year
+LONG_K = 1000
 
 
 def same_for_all(top: list[int], users) -> dict:
