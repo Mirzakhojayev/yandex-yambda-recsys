@@ -7,6 +7,8 @@ REPO_ID = "yandex/yambda"
 REVISION = "main"  # later: replace with a commit hash to freeze the data version
 FILES = [
     "flat/50m/multi_event.parquet",
+    "artist_item_mapping.parquet",
+    "album_item_mapping.parquet",
 ]
 RAW_DIR = Path("data/raw")
 
